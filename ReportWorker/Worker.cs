@@ -202,9 +202,10 @@ public class Worker : IHostedService, IDisposable
                         {
                             while (reader.Read())
                             {
-                                var rowToMod = layout.Where(x => x.Code == reader.GetString(3)).FirstOrDefault();
-                                var Variable = reader.GetString(2);
-                                var varObj = catalog.Where(v => v.Variable == Variable).FirstOrDefault();
+                                var rowToMod = layout.Where(x => x.Code == reader.GetString(3)).FirstOrDefault();//folio
+                                var Variable = reader.GetString(2);//name
+                                var GroupNameData = reader.GetString(1);//groupname
+                                var varObj = catalog.Where(v => v.Variable == Variable && v.GroupName == GroupNameData).FirstOrDefault();
                                 if (varObj != null)
                                 {
                                     rowToMod.ExtraFlieds[$"{varObj.RowNo}_{varObj.Alias}"] = reader.IsDBNull(0) ? "" : reader.GetString(0);
@@ -226,6 +227,7 @@ public class Worker : IHostedService, IDisposable
 
     public void CreateExcelDoc(string pais)
     {
+
         var date = DateTime.Now.ToShortDateString();
         date = date.Replace('/', '-');
         var fileName = $"./Scripts/Reporte {pais} {date}.xlsx"; //"./Scripts/test.xlsx"
@@ -287,6 +289,7 @@ public class Worker : IHostedService, IDisposable
 
         }
     }
+
 
     private async void SendEmailSG()
     {
@@ -362,15 +365,23 @@ public class Worker : IHostedService, IDisposable
         RestartTimer();
     }
 
-    private Cell CreateCell(string text)
+    //private Cell CreateCell(string text)
+    //{
+    //    Cell cell = new Cell
+    //    {
+    //        StyleIndex = 1U,
+    //        DataType = ResolveCellDataTypeOnValue(text),//CellValues.String,
+    //        CellValue = new CellValue(text)
+    //    };
+    //    return cell;
+    //}
+    private Cell CreateCell(string value)
     {
-        Cell cell = new Cell
+        return new Cell()
         {
-            StyleIndex = 1U,
-            DataType = ResolveCellDataTypeOnValue(text),//CellValues.String,
-            CellValue = new CellValue(text)
+            CellValue = new CellValue(value),
+            DataType = CellValues.String
         };
-        return cell;
     }
 
     private EnumValue<CellValues> ResolveCellDataTypeOnValue(string text)
